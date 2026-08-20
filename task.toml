@@ -3,11 +3,12 @@ artifacts = []
 
 [task]
 name = "Andela/frankfurter-http-error"
-description = ""
-authors = []
-keywords = []
+description = "Agent must find and fix an off-by-one in HTTP error-status detection that lets 400 responses pass through as valid data."
+authors = [{name = "Iyanuoluwa Ajao", email = "iyanuoluwa.ajao@talent.andela.com" }]
+keywords = ["python", "fastapi", "api"]
 
 [metadata]
+category = "debugging"
 
 [verifier]
 timeout_sec = 600.0

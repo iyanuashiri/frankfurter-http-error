@@ -1,94 +1,141 @@
-# currency-converter-project
+# Currency Converter Project
 
 ## Description
 
-This is a currency converter project that uses the Frankfurter API to convert currencies.
+This project is a FastAPI-based currency converter that uses the Frankfurter API to fetch exchange rates and supports user management, conversions, and history tracking.
 
 ## Technologies
 
-- Python 3.13
+- Python 3.12+
 - FastAPI
-- Aiohttp
-- Limits
+- SQLAlchemy
+- Alembic
 - Pydantic
 - Uvicorn
+- SQLite (default)
+- Frankfurter API
 
-## Setup
+## Prerequisites
 
-1. Fork and Clone the repository `git clone https://github.com/your-username/currency-converter-project.git`
-2. Navigate to the project directory `cd currency-converter-project`
-3. Install dependencies `uv sync`
-4. Run the application `uv run uvicorn app.main:app --reload`
+- Python 3.12 or newer
+- uv installed
+- Docker installed (for containerized run)
 
+## Project structure
 
+- app/: FastAPI application code
+- alembic/: database migrations
+- tests/: pytest test suite
+- .env: environment variables for local development
+- Dockerfile: container configuration
+
+## Local development with uv
+
+From the backend directory:
+
+```bash
+cd backend
+uv sync
+uv run alembic upgrade head
+uv run uvicorn app.main:app --reload
+```
+
+Then open:
+
+- API: http://localhost:8000
+- Swagger docs: http://localhost:8000/docs
+
+## Docker
+
+From the project root:
+
+```bash
+docker build -f backend/Dockerfile -t harbor-currency-converter-project backend
+docker run -p 8000:8000 harbor-currency-converter-project
+```
+
+The container automatically runs the database migrations before starting the app, so the SQLite database is initialized for you.
+
+## Environment variables
+
+The app reads configuration from a local `.env` file in the backend directory. Example:
+
+```env
+DATABASE_URL=sqlite:///./currency.db
+FRANKFURTER_HOST=api.frankfurter.dev
+```
 
 ## Authentication
 
-The API uses an API key for authentication. The API key should be passed in the header as `X-API-Key`. The API key is generated when a user is created. The API key is unique to each user.
+The API uses an API key for authentication. The key is passed in the `X-API-Key` header and is generated when a user is created.
 
 ## Rate Limiting
 
-The API has a rate limit of 10 requests per minute per user. If the rate limit is exceeded, the API will return a 429 status code.
+The API enforces a rate limit of 10 requests per minute per user. If exceeded, the API returns HTTP 429.
 
 ## Credits
 
-The API has a subscription credit system. Each user starts with 10 credits. Each request costs 1 credit. If the user runs out of credits, the API will return a 403 status code.
+Each user starts with 10 credits. Each request costs 1 credit. Once credits are exhausted, the API returns HTTP 403.
 
 ## Usage
 
-1. Create a user with a username and password endpoint `/users/`. The username should be unique. The endpoint returns the user object with the API key.
-2. Get currencies endpoint `/currencies/`. The endpoint returns the currencies object with the currencies. If the user has insufficient credits, the API will return a 403 status code. It requires an API key.
-3. Get currency rates endpoint `/conversions/`. The base currency should be in the format `USD` and the target currency should be in the format `EUR`. If the user has insufficient credits, the API will return a 403 status code. It requires an API key.
-4. Get historical currency rates endpoint `/historical-rates/{date}`. The date should be in the format `YYYY-MM-DD`. If the user has insufficient credits, the API will return a 403 status code. It requires an API key.
-5. Get historical currency rates endpoint with base currency and target currency `/historical-rates/{date}?base_currency={base_currency}&target_currency={target_currency}`. If no base currency or target currency is provided, the default is USD to EUR. The date should be in the format `YYYY-MM-DD`. If the user has insufficient credits, the API will return a 403 status code. It requires an API key.
-6. Get all users endpoint `/users/`. It returns all users. It does not require an API key.
+1. Create a user with a username and password at `/api/v1/users/`.
+2. Get available currencies at `/api/v1/currencies/`.
+3. Create a conversion at `/api/v1/conversions/`.
+4. View historical rates at `/api/v1/historical-rates/{date}`.
+5. View conversion history at `/api/v1/history/`.
+6. List users at `/api/v1/users/`.
 
-
-## Example Requests
+## Example requests
 
 ```bash
 # Create a user
-POST http://localhost:8000/users/
+POST http://localhost:8000/api/v1/users/
 Content-Type: application/json
 
 {
-    "username": "testuser",
-    "password": "testpassword"
+  "username": "testuser",
+  "password": "testpassword"
 }
 
 # Get currencies
-GET http://localhost:8000/currencies/
+GET http://localhost:8000/api/v1/currencies/
 
-# Get currency rates
-GET http://localhost:8000/conversions/
+# Get conversion rates
+POST http://localhost:8000/api/v1/conversions/
+Content-Type: application/json
 
 {
-    "base_currency": "USD",
-    "target_currency": "EUR"
-    "amount": 100
+  "base_currency": "USD",
+  "target_currency": "EUR",
+  "amount": 100
 }
 
-
 # Get historical currency rates
-GET http://localhost:8000/historical-rates/2023-01-01
+GET http://localhost:8000/api/v1/historical-rates/2023-01-01
 
-# Get historical currency rates with base currency and target currency
-GET http://localhost:8000/historical-rates/2023-01-01?base_currency=USD&target_currency=EUR
-
-# Get all users
-GET http://localhost:8000/users/
-
-No authentication required for this endpoint.
+# Get history for the current user
+GET http://localhost:8000/api/v1/history/
 ```
-
 
 ## API Documentation
 
-The API documentation can be found at `http://localhost:8000/docs`
+Open the interactive API docs at:
+
+```text
+http://localhost:8000/docs
+```
 
 ## Testing
 
-The API can be tested using the `test.py` file.
+Run the test suite with:
+
+```bash
+cd backend
+uv run pytest -v
+```
+
+You can also run a subset of tests if needed.
 
 ## License
 

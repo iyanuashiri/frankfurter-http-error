@@ -29,12 +29,7 @@ def create_user(db: Session, username: str, password: str) -> User:
     return user
 
 
-def update_user(
-    db: Session,
-    user: User,
-    **kwargs,
-) -> User:
-
+def update_user(db: Session, user: User, **kwargs, ) -> User:
     for key, value in kwargs.items():
         if hasattr(user, key):
             setattr(user, key, value)
@@ -45,11 +40,7 @@ def update_user(
     return user
 
 
-def decrement_credits(
-    db: Session,
-    user: User,
-) -> User:
-
+def decrement_credits(db: Session, user: User,) -> User:
     if user.credits > 0:
         user.credits -= 1
 
@@ -59,10 +50,6 @@ def decrement_credits(
     return user
 
 
-def delete_user(
-    db: Session,
-    user: User,
-) -> None:
-
+def delete_user(db: Session, user: User) -> None:
     db.delete(user)
     db.commit()

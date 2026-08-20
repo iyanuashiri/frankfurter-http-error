@@ -5,7 +5,7 @@ from fastapi import HTTPException
 
 
 class RestAdapter:
-    def __init__(self, hostname: str = '"does-not-exist.invalid",', ver: str = 'v1'):
+    def __init__(self, hostname: str = 'api.frankfurter.dev', ver: str = 'v1'):
         self.hostname = hostname
         self.ver = ver
 
@@ -13,7 +13,7 @@ class RestAdapter:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as response:
-                    if response.status >= 400:
+                    if response.status > 400:
                         error_text = await response.text()
                         raise HTTPException(status_code=response.status, detail=f"API request failed: {error_text}")
                     return await response.json()

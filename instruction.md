@@ -1,23 +1,16 @@
-# Preserve upstream HTTP errors from the Frankfurter API
+# Bug: Currency Conversion Silently Returns Bad Data on Invalid Currency Codes
 
-## Background
+When a request is made with an invalid or unsupported currency code, the
+external Frankfurter API returns an error response. Instead of surfacing
+that as a clear error to our users, something downstream is returning
+malformed or unexpected data without raising any exception.
 
-The currency endpoints depend on the Frankfurter API to retrieve exchange rate information.
+Investigate `/app/frankfurter/rest_adapter.py`, specifically how HTTP
+error responses from the external API are detected and handled.
 
-Currently, when the external service cannot be reached, the application raises a `FrankfurterException`. This exception is not translated into an appropriate HTTP response, causing clients to receive a generic `500 Internal Server Error`.
-
-## Your Task
-
-Update the implementation so that failures from the external currency service return the appropriate HTTP response instead of an internal server error.
-
-For example, if the upstream service is unavailable, the API should return:
-
-- HTTP 503 Service Unavailable
-
-instead of
-
-- HTTP 500 Internal Server Error
-
-Do not change the public API of the application.
-
-Existing successful requests should continue to behave exactly as before.
+Error responses from the external API (4xx/5xx) must always raise an
+appropriate exception — never be silently treated as successful data.
+Successful (2xx) responses must keep working exactly as they do now, and
+don't change any method signatures. Assume there's a broader test suite
+covering this and other parts of the app, so don't break anything else
+along the way.

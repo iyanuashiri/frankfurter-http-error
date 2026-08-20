@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
 
 from app.api.main import api_router
-from app.core.database import create_db_and_tables
+from app.core.exceptions import frankfurter_exception_handler
+from frankfurter.exceptions import FrankfurterException
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -19,11 +20,6 @@ app = FastAPI(
 )
 
 
-@app.on_event("startup")
-def startup():
-    create_db_and_tables()
-
-
 origins = [
     "http://localhost:5173",
 ]
@@ -36,7 +32,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(
-    api_router,
-    prefix="/api/v1",
-)
+app.add_exception_handler(FrankfurterException, frankfurter_exception_handler)
+
+app.include_router(api_router, prefix="/api/v1")

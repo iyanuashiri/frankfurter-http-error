@@ -1,25 +1,17 @@
 from collections.abc import Generator
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-DATABASE_URL = "sqlite:///./currency.db"
+from app.core.config import settings
 
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    future=True,
-)
+DATABASE_URL = settings.database_url
 
-SessionLocal = sessionmaker(
-    bind=engine,
-    autoflush=False,
-    autocommit=False,
-    future=True,
-)
+
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False}, future=True)
+
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 
 
 class Base(DeclarativeBase):
@@ -35,5 +27,5 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
-def create_db_and_tables():
-    Base.metadata.create_all(bind=engine)
+# def create_db_and_tables():
+#     Base.metadata.create_all(bind=engine)
